@@ -187,14 +187,17 @@ class Vimeo extends Gateway
      * @inheritDoc
      *
      * @param string $id
+     * @param string|null $hash
      *
      * @return Video
      * @throws VideoNotFoundException
      * @throws \dukt\videos\errors\ApiResponseException
      */
-    public function getVideoById(string $id): Video
+    public function getVideoById(string $id, string $hash = null): Video
     {
-        $data = $this->get('videos/' . $id, [
+        $uri = 'videos/' . $id;
+        $uri .= $hash ? '?h=' . $hash : '';
+        $data = $this->get($uri, [
             'query' => [
                 'fields' => 'created_time,description,duration,height,link,name,pictures,pictures,privacy,stats,uri,user,width,download,review_link,files'
             ],
@@ -220,7 +223,7 @@ class Vimeo extends Gateway
     /**
      * @param string $url
      *
-     * @return bool|string
+     * @return array
      */
     public function extractVideoIdFromUrl(string $url)
     {
@@ -229,6 +232,7 @@ class Vimeo extends Gateway
         $videoId = false;
 
         $regexp = ['/^https?:\/\/(www\.)?vimeo\.com\/([0-9]*)/', 2];
+        $regexpUnlisted = ['/^https?:\/\/(www\.)?vimeo\.com\/([0-9]*)\/([a-z0-9]*)/', 3];
 
         if (preg_match($regexp[0], $url, $matches, PREG_OFFSET_CAPTURE) > 0) {
 
@@ -246,8 +250,17 @@ class Vimeo extends Gateway
             }
         }
 
+        if (preg_match($regexpUnlisted[0], $url, $matches, PREG_OFFSET_CAPTURE) > 0) {
+
+            // regexp match key
+            $match_key = $regexpUnlisted[1];
+
+            // define video id
+            $hash = $matches[$match_key][0];
+        }
+
         // here we should have a valid video_id or false if service not matching
-        return $videoId;
+        return [$videoId, $hash];
     }
 
     /**

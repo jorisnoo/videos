@@ -178,12 +178,13 @@ class YouTube extends Gateway
      * @inheritDoc
      *
      * @param string $id
+     * @param string|null $hash
      *
      * @return Video
      * @throws VideoNotFoundException
      * @throws \dukt\videos\errors\ApiResponseException
      */
-    public function getVideoById(string $id): Video
+    public function getVideoById(string $id, string $hash = null): Video
     {
         $data = $this->get('videos', [
             'query' => [
@@ -216,7 +217,7 @@ class YouTube extends Gateway
      *
      * @param $url
      *
-     * @return bool|string
+     * @return array
      */
     public function extractVideoIdFromUrl(string $url)
     {
@@ -240,7 +241,7 @@ class YouTube extends Gateway
         }
 
         // here we should have a valid video_id or false if service not matching
-        return $video_id;
+        return [$video_id, null];
     }
 
     /**
