@@ -196,7 +196,8 @@ class Vimeo extends Gateway
     public function getVideoById(string $id, string $hash = null): Video
     {
         $uri = 'videos/' . $id;
-        $uri .= $hash ? '?h=' . $hash : '';
+        $uri .= $hash ? ':' . $hash : '';
+
         $data = $this->get($uri, [
             'query' => [
                 'fields' => 'created_time,description,duration,height,link,name,pictures,pictures,privacy,stats,uri,user,width,download,review_link,files'
@@ -230,6 +231,7 @@ class Vimeo extends Gateway
         // check if url works with this service and extract video_id
 
         $videoId = false;
+        $hash = null;
 
         $regexp = ['/^https?:\/\/(www\.)?vimeo\.com\/([0-9]*)/', 2];
         $regexpUnlisted = ['/^https?:\/\/(www\.)?vimeo\.com\/([0-9]*)\/([a-z0-9]*)/', 3];
