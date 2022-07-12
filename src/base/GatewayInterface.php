@@ -63,7 +63,7 @@ interface GatewayInterface
      *
      * @return Video
      */
-    public function getVideoById(string $id, string $hash = null): Video;
+    public function getVideoById(string $id, ?string $hash = null): Video;
 
     /**
      * Returns the URL format of the embed.

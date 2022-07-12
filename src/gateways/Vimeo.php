@@ -574,6 +574,8 @@ class Vimeo extends Gateway
      */
     private function parseVideo(array $data, ?string $hash = null): Video
     {
+        $uri = substr($data['uri'], \strlen('/videos/'));
+
         $video = new Video;
         $video->raw = $data;
         $video->authorName = $data['user']['name'];
@@ -582,11 +584,10 @@ class Vimeo extends Gateway
         $video->description = $data['description'];
         $video->gatewayHandle = 'vimeo';
         $video->gatewayName = 'Vimeo';
-        $video->id = (int)substr($data['uri'], \strlen('/videos/'));
+        $video->id = (int)explode(':', $uri)[0];
         $video->plays = $data['stats']['plays'] ?? 0;
         $video->title = $data['name'];
-        $video->url = 'https://vimeo.com/' . substr($data['uri'], 8);
-        $video->url .= $hash ? '/' . $hash : '';
+        $video->url = 'https://vimeo.com/' . str_replace(':', '/', $uri);
         $video->width = $data['width'];
         $video->height = $data['height'];
         $video->hash = $hash;
