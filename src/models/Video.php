@@ -44,6 +44,11 @@ class Video extends Model
     public $url;
 
     /**
+     * @var string|null The hash of the video
+     */
+    public $hash;
+
+    /**
      * @var string|null The gateway’s handle
      */
     public $gatewayHandle;

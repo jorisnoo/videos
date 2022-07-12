@@ -589,6 +589,7 @@ class Vimeo extends Gateway
         $video->url .= $hash ? '/' . $hash : '';
         $video->width = $data['width'];
         $video->height = $data['height'];
+        $video->hash = $hash;
 
         // Video duration
         $video->durationSeconds = $data['duration'];
