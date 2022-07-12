@@ -343,7 +343,7 @@ abstract class Gateway implements GatewayInterface
             throw new VideoNotFoundException('Video not found with url given.');
         }
 
-        return $this->getVideoById($videoId);
+        return $this->getVideoById($videoId, $hash);
     }
 
     /**

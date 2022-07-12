@@ -193,7 +193,7 @@ class Vimeo extends Gateway
      * @throws VideoNotFoundException
      * @throws \dukt\videos\errors\ApiResponseException
      */
-    public function getVideoById(string $id, string $hash = null): Video
+    public function getVideoById(string $id, ?string $hash = null): Video
     {
         $uri = 'videos/' . $id;
         $uri .= $hash ? ':' . $hash : '';
@@ -205,7 +205,7 @@ class Vimeo extends Gateway
         ]);
 
         if ($data !== []) {
-            return $this->parseVideo($data);
+            return $this->parseVideo($data, $hash);
         }
 
         throw new VideoNotFoundException('Video not found.');
@@ -568,10 +568,11 @@ class Vimeo extends Gateway
      * Parse video.
      *
      * @param array $data
+     * @param string|null $hash
      *
      * @return Video
      */
-    private function parseVideo(array $data): Video
+    private function parseVideo(array $data, ?string $hash = null): Video
     {
         $video = new Video;
         $video->raw = $data;
@@ -585,6 +586,7 @@ class Vimeo extends Gateway
         $video->plays = $data['stats']['plays'] ?? 0;
         $video->title = $data['name'];
         $video->url = 'https://vimeo.com/' . substr($data['uri'], 8);
+        $video->url .= $hash ? '/' . $hash : '';
         $video->width = $data['width'];
         $video->height = $data['height'];
 
