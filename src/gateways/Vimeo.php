@@ -187,21 +187,25 @@ class Vimeo extends Gateway
      * @inheritDoc
      *
      * @param string $id
+     * @param string|null $hash
      *
      * @return Video
      * @throws VideoNotFoundException
      * @throws \dukt\videos\errors\ApiResponseException
      */
-    public function getVideoById(string $id): Video
+    public function getVideoById(string $id, ?string $hash = null): Video
     {
-        $data = $this->get('videos/' . $id, [
+        $uri = 'videos/' . $id;
+        $uri .= $hash ? ':' . $hash : '';
+
+        $data = $this->get($uri, [
             'query' => [
                 'fields' => 'created_time,description,duration,height,link,name,pictures,pictures,privacy,stats,uri,user,width,download,review_link,files'
             ],
         ]);
 
         if ($data !== []) {
-            return $this->parseVideo($data);
+            return $this->parseVideo($data, $hash);
         }
 
         throw new VideoNotFoundException('Video not found.');
@@ -220,15 +224,17 @@ class Vimeo extends Gateway
     /**
      * @param string $url
      *
-     * @return bool|string
+     * @return array
      */
     public function extractVideoIdFromUrl(string $url)
     {
         // check if url works with this service and extract video_id
 
         $videoId = false;
+        $hash = null;
 
         $regexp = ['/^https?:\/\/(www\.)?vimeo\.com\/([0-9]*)/', 2];
+        $regexpUnlisted = ['/^https?:\/\/(www\.)?vimeo\.com\/([0-9]*)\/([a-z0-9]*)/', 3];
 
         if (preg_match($regexp[0], $url, $matches, PREG_OFFSET_CAPTURE) > 0) {
 
@@ -246,8 +252,17 @@ class Vimeo extends Gateway
             }
         }
 
+        if (preg_match($regexpUnlisted[0], $url, $matches, PREG_OFFSET_CAPTURE) > 0) {
+
+            // regexp match key
+            $match_key = $regexpUnlisted[1];
+
+            // define video id
+            $hash = $matches[$match_key][0];
+        }
+
         // here we should have a valid video_id or false if service not matching
-        return $videoId;
+        return [$videoId, $hash];
     }
 
     /**
@@ -553,11 +568,14 @@ class Vimeo extends Gateway
      * Parse video.
      *
      * @param array $data
+     * @param string|null $hash
      *
      * @return Video
      */
-    private function parseVideo(array $data): Video
+    private function parseVideo(array $data, ?string $hash = null): Video
     {
+        $uri = substr($data['uri'], \strlen('/videos/'));
+
         $video = new Video;
         $video->raw = $data;
         $video->authorName = $data['user']['name'];
@@ -566,12 +584,14 @@ class Vimeo extends Gateway
         $video->description = $data['description'];
         $video->gatewayHandle = 'vimeo';
         $video->gatewayName = 'Vimeo';
-        $video->id = (int)substr($data['uri'], \strlen('/videos/'));
+        $video->id = (int)explode(':', $uri)[0];
         $video->plays = $data['stats']['plays'] ?? 0;
         $video->title = $data['name'];
-        $video->url = 'https://vimeo.com/' . substr($data['uri'], 8);
+        $video->url = 'https://vimeo.com/' . $video->id;
+        $video->url .= $hash ? '/' . $hash : '';
         $video->width = $data['width'];
         $video->height = $data['height'];
+        $video->hash = $hash;
 
         // Video duration
         $video->durationSeconds = $data['duration'];

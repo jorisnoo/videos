@@ -59,10 +59,11 @@ interface GatewayInterface
      * Requests the video from the API and then returns it as video object.
      *
      * @param string $id
+     * @param string|null $hash
      *
      * @return Video
      */
-    public function getVideoById(string $id): Video;
+    public function getVideoById(string $id, ?string $hash = null): Video;
 
     /**
      * Returns the URL format of the embed.
@@ -76,7 +77,7 @@ interface GatewayInterface
      *
      * @param string $url
      *
-     * @return bool|string
+     * @return array
      */
     public function extractVideoIdFromUrl(string $url);
 }

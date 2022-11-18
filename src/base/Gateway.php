@@ -337,13 +337,13 @@ abstract class Gateway implements GatewayInterface
     {
         $url = $url['url'];
 
-        $videoId = $this->extractVideoIdFromUrl($url);
+        [$videoId, $hash] = $this->extractVideoIdFromUrl($url);
 
         if (!$videoId) {
             throw new VideoNotFoundException('Video not found with url given.');
         }
 
-        return $this->getVideoById($videoId);
+        return $this->getVideoById($videoId, $hash);
     }
 
     /**
